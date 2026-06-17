@@ -1,0 +1,111 @@
+{
+  "entities": {
+    "Guest": {
+      "title": "Guest",
+      "description": "Details of checking in/out guests in the hostel",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A unique identifier for the booking (e.g., booking-[timestamp])"
+        },
+        "name": {
+          "type": "string",
+          "description": "Guest's full name"
+        },
+        "mobile": {
+          "type": "string",
+          "description": "Guest's mobile number, used for credit sync matching"
+        },
+        "roomNo": {
+          "type": "string",
+          "description": "Room or Bed number"
+        },
+        "checkIn": {
+          "type": "string",
+          "format": "date",
+          "description": "Check-In date (YYYY-MM-DD)"
+        },
+        "checkOut": {
+          "type": "string",
+          "format": "date",
+          "description": "Check-Out date (YYYY-MM-DD)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["checked_in", "checked_out"],
+          "description": "Stay status"
+        },
+        "dailyRate": {
+          "type": "number",
+          "description": "The charge rate per day"
+        },
+        "originalCheckOut": {
+          "type": "string",
+          "format": "date",
+          "description": "Optional original scheduled checkout"
+        },
+        "actualCheckOut": {
+          "type": "string",
+          "format": "date",
+          "description": "Optional actual checkout date if early"
+        },
+        "balanceDaysUsed": {
+          "type": "number",
+          "description": "Saved credits applied during checkin"
+        },
+        "savedBalanceDays": {
+          "type": "number",
+          "description": "Early checkout days saved to guest balance"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes or comments"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when this record was created"
+        }
+      },
+      "required": ["id", "name", "mobile", "roomNo", "checkIn", "checkOut", "status", "dailyRate", "createdAt"]
+    },
+    "GuestCredit": {
+      "title": "GuestCredit",
+      "description": "The credit balance of unused days earned by a guest for future bookings",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier (the mobile number)"
+        },
+        "guestName": {
+          "type": "string",
+          "description": "The guest who earns this credit balance"
+        },
+        "guestMobile": {
+          "type": "string",
+          "description": "The unique mobile associated with the balance"
+        },
+        "balanceDays": {
+          "type": "number",
+          "description": "Current active balance of unused days"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when balance was updated"
+        }
+      },
+      "required": ["id", "guestName", "guestMobile", "balanceDays", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "guests/{guestId}": {
+      "schema": "Guest",
+      "description": "The collection of active bookings and histories"
+    },
+    "credits/{creditId}": {
+      "schema": "GuestCredit",
+      "description": "Saved unused days credits indexed by guests mobile numbers"
+    }
+  }
+}

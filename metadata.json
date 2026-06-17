@@ -1,0 +1,6 @@
+{
+  "name": "Sai Hostels",
+  "description": "A mobile-friendly hostel and guest management application with real-time sync, check-in/out tracking, early checkout balance day rollover, and checkout notification alerts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

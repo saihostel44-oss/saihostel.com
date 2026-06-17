@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened path and format helpers
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\:\\.\\[\\]]+$');
+    }
+
+    // Incoming payload helper
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Validation for Guest booking entity
+    function isValidGuest(data) {
+      return data.keys().hasAll(['id', 'name', 'mobile', 'roomNo', 'checkIn', 'checkOut', 'status', 'dailyRate', 'createdAt'])
+        && data.id is string && data.id.size() <= 100
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && data.mobile is string && data.mobile.size() >= 5 && data.mobile.size() <= 50
+        && data.roomNo is string && data.roomNo.size() > 0 && data.roomNo.size() <= 50
+        && data.checkIn is string && data.checkIn.size() <= 20
+        && data.checkOut is string && data.checkOut.size() <= 20
+        && data.status in ['checked_in', 'checked_out']
+        && (data.dailyRate is int || data.dailyRate is float)
+        && data.createdAt is string
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000))
+        && (!('actualCheckOut' in data) || (data.actualCheckOut is string && data.actualCheckOut.size() <= 20))
+        && (!('savedBalanceDays' in data) || (data.savedBalanceDays is int || data.savedBalanceDays is float))
+        && (!('balanceDaysUsed' in data) || (data.balanceDaysUsed is int || data.balanceDaysUsed is float));
+    }
+
+    // Match block for guests collection
+    match /guests/{guestId} {
+      allow read: if true;
+      allow create, update: if isValidId(guestId) && isValidGuest(incoming());
+      allow delete: if false;
+    }
+
+    // Validation for GuestCredit entity
+    function isValidCredit(data) {
+      return data.keys().hasAll(['id', 'guestName', 'guestMobile', 'balanceDays', 'updatedAt'])
+        && data.id is string && data.id.size() <= 100
+        && data.guestName is string && data.guestName.size() > 0 && data.guestName.size() <= 200
+        && data.guestMobile is string && data.guestMobile.size() >= 5 && data.guestMobile.size() <= 50
+        && (data.balanceDays is int || data.balanceDays is float)
+        && data.updatedAt is string;
+    }
+
+    // Match block for credits collection
+    match /credits/{creditId} {
+      allow read: if true;
+      allow create, update: if isValidId(creditId) && isValidCredit(incoming());
+      allow delete: if false;
+    }
+  }
+}
